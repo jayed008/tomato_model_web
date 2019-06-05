@@ -1,0 +1,18 @@
+'usestrict';
+const math = require('mathjs');
+math.config({
+  number: 'number', // Default type of number:
+                       // 'number' (default), 'BigNumber', or 'Fraction'
+  precision: 32        // Number of significant digits for BigNumbers
+});
+
+
+const ca=math.matrix([[4.5e-3,9e-3,1.34e-2,1.8e-2,2.25e-2,2.7e-2]]);
+const x0=math.matrix([[75e-4,112e-4,200e-6,1.34e-2,200e-6,200e-6,200e-6,0]]);
+const p1=math.matrix([[1e8,1e0,1e0,1e0,1e19,1.34e-2,75e-4,112e-4,1e-3]]);
+const p2=math.matrix([[0  ,1e0,1e0,1e0,1e19,1.34e-2,75e-4,112e-4,1e-3]]);
+
+module.exports.ca=ca;
+module.exports.x0=x0;
+module.exports.p1=p1;
+module.exports.p2=p2;

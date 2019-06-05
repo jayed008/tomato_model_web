@@ -1,0 +1,32 @@
+'use strict';
+const math = require('mathjs');
+math.config({
+  number: 'number', // Default type of number:
+                       // 'number' (default), 'BigNumber', or 'Fraction'
+  precision: 8      // Number of significant digits for BigNumbers
+})
+
+function des(x,p){
+	var s =math.zeros(1,8);
+	var xx=[];
+	for(var i=0;i<8;i++){
+		xx[i]=math.number(math.subset(x,math.index(0,i)));
+	}
+	var pp=[];
+	for(var i=0;i<9;i++){
+		pp[i]=math.number(math.subset(p,math.index(0,i)));
+	}
+	s.subset(math.index(0,0),math.multiply(2,math.pow(xx[0],2),math.pow(xx[1],3),-pp[0])+math.multiply(xx[5],(pp[6]-xx[0]),pp[3]));         //ADP
+	s.subset(math.index(0,1),math.multiply(3,math.pow(xx[0],2),math.pow(xx[1],3),-pp[0])+math.multiply(xx[4],(pp[7]-xx[1]),pp[2])+math.multiply(3,math.pow(xx[6],5),math.pow(pp[7]-xx[1],3),pp[4])); //NADP)+math.multiply(
+	s.subset(math.index(0,2),math.multiply(xx[2],xx[3],-pp[1])+math.multiply(3,math.pow(xx[6],5),math.pow(pp[7]-xx[1],3),pp[4]));           //RUBP
+	s.subset(math.index(0,3),math.multiply(xx[2],xx[3],-pp[1])+math.multiply((pp[5]-xx[3]),pp[8]));                                        //Ci
+	s.subset(math.index(0,4),math.multiply(2,xx[2],xx[3],pp[1])+math.multiply(xx[4],(pp[7]-xx[1]),-pp[2]));                                 //PGA
+	s.subset(math.index(0,5),math.multiply(xx[4],(pp[7]-xx[1]),pp[2])+math.multiply(xx[5],(pp[6]-xx[0]),-pp[3]));                            //DPGA
+	s.subset(math.index(0,6),math.multiply(xx[5],(pp[6]-xx[0]),pp[3])+math.multiply(6,math.pow(xx[6],5),math.pow(pp[7]-xx[1],3),-pp[4]));    //PGAld
+	s.subset(math.index(0,7),math.multiply(math.pow(xx[6],5),math.pow(pp[7]-xx[1],3),pp[4]/4));											//Suagr
+	// var ss=[s];
+	return s;
+}
+
+
+module.exports = des;

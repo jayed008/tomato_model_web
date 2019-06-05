@@ -1,0 +1,153 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!--     <script type="text/javascript">
+
+	</script> -->
+  </head>
+  <body>
+     <input type="button" value="step1" onclick="javascript:main1step()">
+	 <input type="button" value="receiveStep1XMatrix" onclick="javascript:receive('xMatrix')">
+	 <input type="button" value="test1step" onclick="javascript:m1()">
+	 <input type="button" value="test2step" onclick="javascript:m2()">
+	 <input type="button" value="Draw NADP+ Concentration" onclick="javascript:todraw('NADP+')">
+	 <input type="button" value="Draw ADP Concentration" onclick="javascript:todraw('ADP')">
+	 <input type="button" value="Draw RUBP Concentration" onclick="javascript:todraw('RUBP')">
+	 <input type="button" value="Draw Ci Concentration" onclick="javascript:todraw('Ci')">
+	 <input type="button" value="Draw PGAld Concentration" onclick="javascript:todraw('PGAld')">
+	 <input type="button" value="Draw Sugar Concentration" onclick="javascript:todraw('Sugar')">
+	 <div id="adpchart" style="width: 900px; height: 200px"></div>
+	 <!-- <div id="nadppchart" style="width: 900px; height: 500px"></div> -->
+	 <!-- <div id="rubpchart" style="width: 900px; height: 500px"></div> -->
+	 <!-- <div id="cichart" style="width: 900px; height: 500px"></div> -->
+	 <!-- <div id="pgald" style="width: 900px; height: 500px"></div> -->
+	 <!-- <div id="sugarchart" style="width: 900px; height: 500px"></div> -->
+  </body>
+ 
+ <!--这里引用要放在body下面-->
+ <script language="JAVASCRIPT" src='chemicals2sugars.js'></script>
+ <script language="JAVASCRIPT" src='receiveJSON.js'></script>
+ <script language="JAVASCRIPT" src='teststeps.js'></script>
+ <script type="text/javascript">
+	
+	function todraw(substance){
+	google.load("visualization", "1",{packages:["line"]}); 
+	google.charts.setOnLoadCallback(drawChart1);
+	window.substance = substance;
+	}
+	
+	
+	function drawChart1() {
+	element_funsr=document.createElement("script");
+	element_funsr.setAttribute("type","text/javascript");
+	element_funsr.setAttribute("src","./receiveJSON.js");// 在这里引入了./receiveJSON.js
+	document.body.appendChild(element_funsr);
+	
+	element_funs1=document.createElement("script");
+	element_funs1.setAttribute("type","text/javascript");
+	element_funs1.setAttribute("src","./functions.js");// 在这里引入了./functions.js
+	document.body.appendChild(element_funs1);
+	
+	var xMatrixJ = receive('xMatrix');
+	
+	var data1 = new google.visualization.DataTable();
+	
+	<!-- data.addColumn('number', 'Concentration of NADP+'); -->
+	<!-- data.addColumn('number', 'Concentration of RUBP'); -->
+	<!-- data.addColumn('number', 'Concentration of Ci'); -->
+	<!-- data.addColumn('number', 'Concentration of PGA'); -->
+	<!-- data.addColumn('number', 'Concentration of DPGA'); -->
+	<!-- data.addColumn('number', 'Concentration of PGAld'); -->
+	<!-- data.addColumn('number', 'Concentration of Sugar'); -->
+	
+	//daysValue control
+	
+	var xMatrix = zeros(865,1);
+	var xMx =create2dEmpty(865);
+	for(var i=0;i<xMatrix.length;i++){
+		xMatrix[i][0]=i*100/3600;
+		xMx[i]=xMatrix[i].concat(xMatrixJ[(i*100).toString()]);
+	}
+	
+	var xMxx = create2dEmpty(865);
+	for(var o=1;o<xMx.length;o++){
+		for (let item of xMx[o]) {
+			if (item) {
+				xMxx[o].push(item)
+			}
+	}}
+	xMxx.shift(); //xMxx为[['time',各物质浓度]]
+	
+	//分离浓度序列
+	var time = create2dEmpty(865-1);
+	var cADP = create2dEmpty(865-1);
+	var cNADPp = create2dEmpty(865-1);
+	var cRUBP = create2dEmpty(865-1);
+	var cCi = create2dEmpty(865-1);
+	var cPGAld = create2dEmpty(865-1);
+	var cSugar = create2dEmpty(865-1);
+	for(var k=0;k<865-1;k++){
+		time[k]	  = [xMxx[k][0]];
+		cADP[k]   = [xMxx[k][1]];
+		cNADPp[k] = [xMxx[k][2]];
+		cRUBP[k]  = [xMxx[k][3]];
+		cCi[k]    = [xMxx[k][4]];
+		cPGAld[k] = [xMxx[k][7]];
+		cSugar[k] = [xMxx[k][8]];
+	}
+	
+	cADP=attach2dArray(cADP,time);
+	cNADPp=attach2dArray(cNADPp,time);
+	cRUBP=attach2dArray(cRUBP,time);
+	cCi=attach2dArray(cCi,time);
+	cPGAld=attach2dArray(cPGAld,time);
+	cSugar=attach2dArray(cSugar,time);
+	
+	switch (substance){
+	case 'ADP':
+		var require = cADP;
+		break;
+	case 'NADP+':
+		var require = cNADPp;
+		break;
+	case 'RUBP':
+		var require = cRUBP;
+		break;
+	case 'Ci':
+		var require = cCi;
+		break;
+	case 'PGAld':
+		var require = cPGAld;
+		break;
+	case 'Sugar':
+		var require = cSugar;
+		break;
+	}
+	
+
+	data1.addColumn('number', 'hour');
+	data1.addColumn('number', 'Concentration of '+substance);
+	data1.addRows(require);
+	var options = {
+	chart: {
+	  title: 'Every day change(unit: mol/m2)'
+	},
+	width: 900,
+	height: 200
+	};
+	var chart = new google.charts.Line(document.getElementById('adpchart'));
+	chart.draw(data1, google.charts.Line.convertOptions(options));
+
+	}
+	
+	function attach2dArray(arr,time){
+		var arr1 = create2dEmpty(arr.length);
+		for(var q=0;q<arr.length;q++){
+			arr1[q]=time[q].concat(arr[q]);
+		}
+		return arr1;
+	}
+	
+    </script>
+ 
+</html>

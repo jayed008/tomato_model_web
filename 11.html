@@ -1,0 +1,380 @@
+ <html>
+ <head>
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+  <div id="app">
+    <div>
+      <div class="main">
+        <!-- 3D图 -->
+        <div class="Graph3d"></div>
+        <!-- 3D图右边的部分 -->
+        <div class="DataInput">
+          <div class="box_DataInput">
+            <el-button type="info" class="databutton" plain>载入CA</el-button>
+            <div class="table">
+              <el-table :data="tableData3" height="450" border  style="width: 100%" >
+                <el-table-column prop="date" label="时间" width="150" align="center"></el-table-column>
+                <el-table-column prop="name" label="输入CA的值" width="300" align="center">
+                  <template slot-scope="scope">
+                    <el-input
+                    placeholder="请输入内容"
+                    v-model="tableData3[scope.$index].value"
+                    clearable>
+                  </el-input>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <el-button type="info" class="databutton" plain>按天三维模拟生长</el-button>
+          <el-button type="info" class="databutton" plain>图表显示模拟</el-button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="foot">
+      <!-- 24小时变化区域 -->
+      <div class="GraphHours">
+        <div class="box_GraphHours">
+          <div class="buttons_GraphHours">
+            <el-button type="info" plain class="btn_GraphHours" onclick="javascript:todraw('Ci')">Ci 24小时浓度变化</el-button>
+
+            <el-button type="info" plain class="btn_GraphHours" onclick="javascript:todraw('Sugar')">糖 24小时浓度变化</el-button>
+
+            <div class="CA_input">
+              <span style="color: #8c939d; margin-right: 5px;"> CA:</span>
+              <el-input
+              class="input_GraphHours"
+              placeholder=""
+              
+              clearable>
+            </el-input>
+            <el-button type="info" plain class="btn_CA">按钮</el-button>
+          </div>
+
+          <span style="color: #8c939d flex=1;">说明文字说明文字说明文字说明文字说明文字说明文字说明文字</span>
+        </ul>
+      </div>
+      <!-- 24小时图 -->
+      <div id = "graph_GraphHours" class="graph_GraphHours">
+
+      </div>
+
+    </div>
+  </div>
+  <!-- 一天的变化区域 -->
+  <div class="GraphDay">
+    <div class="box_GraphDay">
+      <div class="buttons_GraphDay">
+        <el-button type="info" plain class="btn_GraphDay">CA浓度变化</el-button>
+        <el-button type="info" plain class="btn_GraphDay">叶面积变化</el-button>
+        <el-button type="info" plain class="btn_GraphDay">各部分干重变化</el-button>
+      </div>
+      <!-- 一天的图 -->
+      <div class="graph_GraphDay">
+
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: function() {
+      return {
+        tableData3: [{
+          date: '第1天',
+          value:''
+        }, {
+          date: '第2天',
+          value:''
+        }, {
+          date: '第3天',
+          value:''
+        }, {
+          date: '第4天',
+          value:''
+        }, {
+          date: '第5天',
+          value:''
+        }, {
+          date: '第6天',
+          value:''
+        }, {
+          date: '第7天',
+          value:''
+        }, {
+          date: '第8天',
+          value:''
+        }, {
+          date: '第9天',
+          value:''
+        }, {
+          date: '第10天',
+          value:''
+        }]
+      }
+    }
+  })
+</script>
+ <script language="JAVASCRIPT" src='chemicals2sugars.js'></script>
+ <script language="JAVASCRIPT" src='receiveJSON.js'></script>
+ <script language="JAVASCRIPT" src='teststeps.js'></script>
+ <script type="text/javascript">
+	
+	function todraw(substance){
+	google.charts.load('current', {packages: ['corechart', 'line']});
+	//google.load("visualization", "1",{packages:["line"]}); 
+	google.charts.setOnLoadCallback(drawChart1);
+	window.substance = substance;
+	}
+	
+	
+	function drawChart1() {
+	element_funsr=document.createElement("script");
+	element_funsr.setAttribute("type","text/javascript");
+	element_funsr.setAttribute("src","./receiveJSON.js");// 在这里引入了./receiveJSON.js
+	document.body.appendChild(element_funsr);
+	
+	element_funs1=document.createElement("script");
+	element_funs1.setAttribute("type","text/javascript");
+	element_funs1.setAttribute("src","./functions.js");// 在这里引入了./functions.js
+	document.body.appendChild(element_funs1);
+	
+	var xMatrixJ = receive('xMatrix');
+	
+	var data1 = new google.visualization.DataTable();
+	
+	<!-- data.addColumn('number', 'Concentration of NADP+'); -->
+	<!-- data.addColumn('number', 'Concentration of RUBP'); -->
+	<!-- data.addColumn('number', 'Concentration of Ci'); -->
+	<!-- data.addColumn('number', 'Concentration of PGA'); -->
+	<!-- data.addColumn('number', 'Concentration of DPGA'); -->
+	<!-- data.addColumn('number', 'Concentration of PGAld'); -->
+	<!-- data.addColumn('number', 'Concentration of Sugar'); -->
+	
+	//daysValue control
+	
+	var xMatrix = zeros(865,1);
+	var xMx =create2dEmpty(865);
+	for(var i=0;i<xMatrix.length;i++){
+		xMatrix[i][0]=i*100/3600;
+		xMx[i]=xMatrix[i].concat(xMatrixJ[(i*100).toString()]);
+	}
+	
+	var xMxx = create2dEmpty(865);
+	for(var o=1;o<xMx.length;o++){
+		for (let item of xMx[o]) {
+			if (item) {
+				xMxx[o].push(item)
+			}
+	}}
+	xMxx.shift(); //xMxx为[['time',各物质浓度]]
+	
+	//分离浓度序列
+	var time = create2dEmpty(865-1);
+	var cADP = create2dEmpty(865-1);
+	var cNADPp = create2dEmpty(865-1);
+	var cRUBP = create2dEmpty(865-1);
+	var cCi = create2dEmpty(865-1);
+	var cPGAld = create2dEmpty(865-1);
+	var cSugar = create2dEmpty(865-1);
+	for(var k=0;k<865-1;k++){
+		time[k]	  = [xMxx[k][0]];
+		cADP[k]   = [xMxx[k][1]];
+		cNADPp[k] = [xMxx[k][2]];
+		cRUBP[k]  = [xMxx[k][3]];
+		cCi[k]    = [xMxx[k][4]];
+		cPGAld[k] = [xMxx[k][7]];
+		cSugar[k] = [xMxx[k][8]];
+	}
+	
+	cADP=attach2dArray(cADP,time);
+	cNADPp=attach2dArray(cNADPp,time);
+	cRUBP=attach2dArray(cRUBP,time);
+	cCi=attach2dArray(cCi,time);
+	cPGAld=attach2dArray(cPGAld,time);
+	cSugar=attach2dArray(cSugar,time);
+	
+	switch (substance){
+	case 'ADP':
+		var require = cADP;
+		break;
+	case 'NADP+':
+		var require = cNADPp;
+		break;
+	case 'RUBP':
+		var require = cRUBP;
+		break;
+	case 'Ci':
+		var require = cCi;
+		break;
+	case 'PGAld':
+		var require = cPGAld;
+		break;
+	case 'Sugar':
+		var require = cSugar;
+		break;
+	}
+	
+
+	data1.addColumn('number', 'hour');
+	data1.addColumn('number', 'Concentration of '+substance);
+	data1.addRows(require);
+	var options = {
+	hAxis: {
+	  title: 't(hour)'
+	},
+	vAxis: {
+	  title: 'concentration'
+	},
+	series: {
+	  1: {curveType: 'function'}
+	},
+	width: 700,
+	height: 300
+	};
+	var chart = new google.charts.Line(document.getElementById('graph_GraphHours'));
+	chart.draw(data1, google.charts.Line.convertOptions(options));
+
+	}
+	
+	function attach2dArray(arr,time){
+		var arr1 = create2dEmpty(arr.length);
+		for(var q=0;q<arr.length;q++){
+			arr1[q]=time[q].concat(arr[q]);
+		}
+		return arr1;
+	}
+	
+    </script>
+</html>
+<style type="text/css">
+/*主布局*/
+.main {
+  width: 100%;
+  height: 640px;
+  display: flex;
+}
+
+.foot {
+  width: 100%;
+  height: 300px;
+  display: flex;
+}
+
+.Graph3d {
+  width: 79%;
+  height: 640px;
+  border: 1px solid #8c939d;
+  flex: 3;
+}
+
+.DataInput {
+  height: 640px;
+  padding: 5px;
+  flex: 1;
+}
+
+.GraphHours {
+  width: 50%;
+  height: 300px;
+  flex:1;
+}
+.GraphDay{
+  width: 50%;
+  height: 300px;
+  flex:1;
+}
+/*3D图右边部分布局*/
+.box_DataInput{
+  display: flex;
+  justify-content: center;
+  flex-direction:column;
+}
+.databutton{
+  margin: 10px auto;
+  width: 40%;
+}
+.table{
+  flex: 5;
+  margin: auto 10px;
+}
+.el-button+.el-button {
+  margin: 10px auto;
+}
+
+/*24小时部分布局*/
+.box_GraphHours{
+  display: flex;
+}
+
+.buttons_GraphHours {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-direction:column;
+  margin: 10px auto;
+
+}
+.btn_GraphHours{
+  flex: 1;
+  margin-top: 15px;
+  width: 80%;
+  margin: 10px auto;
+}
+.CA_input{
+  flex: 2;
+  text-align:center;
+  line-height: 50px;
+  display: flex;
+  justify-content: center;
+}
+.input_GraphHours{
+  width: 35%;
+}
+.btn_CA{
+  margin: 0px 5px 36px;
+}
+.graph_GraphHours {
+  flex: 3;
+  height: 300px;
+  border: 1px solid #8c939d;
+  margin: 5px;
+}
+/*一天部分布局*/
+.box_GraphDay{
+  display: flex;
+}
+.buttons_GraphDay {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-direction:column;
+  margin: 30px auto;
+}
+
+.graph_GraphDay {
+  flex: 3;
+  height: 300px;
+  border: 1px solid #8c939d;
+  margin: 5px;
+}
+.btn_GraphDay{
+  flex: 1;
+  width:90%;
+  margin: 10px auto;
+}
+</style>
